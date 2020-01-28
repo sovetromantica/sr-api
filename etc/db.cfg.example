@@ -1,0 +1,5 @@
+db:
+    DB_HOST: 'IP'
+    DB_NAME: 'DBNAME'
+    DB_USER: 'USRNAME'
+    DB_PASS: 'PASS'

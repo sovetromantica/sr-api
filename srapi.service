@@ -1,0 +1,14 @@
+[Unit]
+Description=SR API server
+WorkingDirectory=/opt/sr-api
+After=network.target
+[Service]
+StartLimitIntervalSec=0[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/local/bin/morbo /opt/sr-api/api.pl -l 'http://*:3001'
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,170 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Sovetromantica API методы",
+    "version": "1.0.0",
+    "title": "Sovetromantica API"
+  },
+  "host": "api.disi.moe",
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "Anime",
+      "description": "Первая версия API sovetromantica",
+      "externalDocs": {
+        "description": "Больше информации на",
+        "url": "http://sovetromantica.com"
+      }
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/animesearch": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Метод ищет информацию об аниме",
+        "description": "Возвращает JSON таблицу",
+        "operationId": "getAnimeSearch",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "anime_name",
+            "in": "query",
+            "description": "часть названия аниме, на английском или русском",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Method not found"
+          }
+        }
+      }
+    },
+    "/anime/{anime_id}": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Метод ищет информацию об аниме",
+        "description": "Возвращает JSON таблицу",
+        "operationId": "getAnimeInfo",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "anime_id",
+            "in": "path",
+            "description": "ID аниме",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "incorrect argument or empty data"
+          }
+        }
+      }
+    },
+    "/anime/{anime_id}/episodes": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Метод возвращает спиок эпизодов",
+        "description": "Метод возвращает спиок эпизодов по ID аниме",
+        "operationId": "getAnimeEpisodesByAnimeID",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "anime_id",
+            "in": "path",
+            "description": "ID аниме",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "incorrect argument or empty data"
+          }
+        }
+      }
+    },
+    "/episode/{episode_id}": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Метод возвращает информацию об эпизоде",
+        "description": "Метод возвращает информацию об эпизоде по его ID",
+        "operationId": "getAnimeEpisodeById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "episode_id",
+            "in": "path",
+            "description": "ID аниме",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "incorrect argument or empty data"
+          }
+        }
+      }
+    },
+    "/last_episodes": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Возвращает 15 последних эпизодов",
+        "description": "Возвращает JSON таблицу с 15 последними эпизодами",
+        "operationId": "getEpisodesLatest",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+      }
+    }
+  }
+}
