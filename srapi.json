@@ -60,7 +60,7 @@
         "tags": [
           "Anime"
         ],
-        "summary": "Метод ищет информацию об аниме",
+        "summary": "Метод возвращает информацию об аниме тайтле",
         "description": "Возвращает JSON таблицу",
         "operationId": "getAnimeInfo",
         "produces": [

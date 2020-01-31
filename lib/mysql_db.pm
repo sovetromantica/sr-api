@@ -13,8 +13,12 @@ sub DB_Init {
     my $class = shift;
     my $self = { @_ };
 
-    $self->{DB_HOST} = '127.0.0.1' if (!defined $self->{DB_HOST});
-    $self->{DB_PORT} = '3306' if (!defined $self->{DB_PORT});
+    $self->{DB_HOST} = $ENV{'DB_HOST'} if (!defined $self->{DB_HOST});
+    $self->{DB_PORT} = $ENV{'DB_PORT'} if (!defined $self->{DB_PORT});
+
+    $self->{DB_NAME} = $ENV{'DB_NAME'} if (!defined $self->{DB_NAME});
+    $self->{DB_USER} = $ENV{'DB_USER'} if (!defined $self->{DB_USER});
+    $self->{DB_PASS} = $ENV{'DB_PASS'} if (!defined $self->{DB_PASS});
 
     bless($self, $class);
 

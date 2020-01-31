@@ -24,17 +24,19 @@ my $db = mysql_db->DB_Init(
     %{$cfg_lib::config->{'db'}}
 );
 
+
+# Go to the production!
+app->mode('production');
+
 # App instructions
-get '/' => qw(index);
+get '/' => sub {
+    my $self = shift;
+    $self->render(text => "Hello.");
+};
 
 # Anything works, a long as it's GET and POST
 any ['GET', 'POST'] => '/v1/time' => sub {
     shift->render(json => { now => scalar(localtime) });
-};
-
-# Just a GET request
-get '/v1/epoch' => sub {
-    shift->render(json => { now => time });
 };
 
 get '/v1/animesearch' => sub {
@@ -82,8 +84,23 @@ get '/v1/anime/:anime_id' => sub {
     };
 
     my $dbh = $db->DB_GetLink();
-    my $sth = $dbh->prepare("SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes FROM anime WHERE anime_disabled = 0 and anime_id = ?");
-    $sth->execute($id);
+
+    # Кто-нибудь, придумайте запрос умнее!
+    my $sth = $dbh->prepare("
+    SELECT 
+        anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes, 
+        anime_soft_raw_link, anime_ongoing,
+            (SELECT count(episode_count) FROM episodes WHERE episode_type = 0 AND episode_posted = 1 AND episode_anime = ?) as episode_current_sub,
+            (SELECT count(episode_count) FROM episodes WHERE episode_type = 1 AND episode_posted = 1 AND episode_anime = ?) as episode_current_dub
+    FROM 
+        anime
+    WHERE 
+        anime_disabled = 0
+    AND 
+        anime_id = ?
+    LIMIT 1"
+    );
+    $sth->execute($id,$id,$id);
     
     my @titles = ();
     while (my $ref = $sth->fetchrow_hashref()) {

@@ -1,0 +1,22 @@
+version: '2'
+services:
+    srapi-web-server:
+        build: .
+        container_name: srapi-gw
+        ports:
+            - '127.0.0.1:3050:3001'
+        volumes:
+            - ./etc/db.cfg:/srapi/etc/db.cfg
+            - ./lib:/srapi/lib
+            - ./api.pl:/srapi/api.pl
+        restart: always
+    swagger-ui:
+        image: swaggerapi/swagger-ui
+        container_name: "srapi-swagger-ui"
+        ports:
+            - "127.0.0.1:3051:8080"
+        volumes:
+            - ./srapi.json:/srapi.json
+        environment:
+            SWAGGER_JSON: /srapi.json
+        restart: always
