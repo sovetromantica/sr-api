@@ -52,7 +52,7 @@ get '/v1/animesearch' => sub {
         return;               
     }
     my $dbh = $db->DB_GetLink();
-    my $sth = $dbh->prepare("SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes FROM anime  WHERE anime.anime_name LIKE ? or anime.anime_name_russian LIKE ?");
+    my $sth = $dbh->prepare("SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes FROM anime  WHERE anime.anime_name LIKE ? or anime.anime_name_russian LIKE ? LIMIT 5");
     $sth->execute("%".$name."%","%".$name."%");
     
     my @titles = ();
