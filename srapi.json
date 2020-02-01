@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "description": "Sovetromantica API методы",
-    "version": "1.0.0",
-    "title": "Sovetromantica API"
+    "version": "1.0.1",
+    "title": "Sovetromantica APIᵇᵉᵗᵃ"
   },
-  "host": "api.disi.moe",
+  "host": "service.sovetromantica.com",
   "basePath": "/v1",
   "tags": [
     {
@@ -18,7 +18,7 @@
     }
   ],
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/animesearch": {
