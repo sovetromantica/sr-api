@@ -222,13 +222,17 @@ my $clients = {};
 websocket '/v1/ws_episodes' => sub {
     my $self = shift;
 
-    $self->inactivity_timeout(0);
-
     my $id = sprintf "%s", $self->tx;
     $clients->{$id} = $self->tx;
 
     $self->on(finish => sub {
         delete $clients->{$id};
+    });
+    $self->on(message => sub {
+        my ($self, $message) = @_;
+        if ($message eq 'ACK') {
+            $self->send({json => { 'answer' => 'im okey' }});
+        };
     });
 };
 
