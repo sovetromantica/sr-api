@@ -13,6 +13,11 @@ use Scalar::Util qw(looks_like_number);
 use Data::Dumper;
 use Encode;
 use utf8;
+use DateTime;
+use JSON;
+
+use EV;
+use AnyEvent;
 binmode (STDIN,':utf8');
 BEGIN {
     use cfg_lib;
@@ -52,7 +57,7 @@ get '/v1/animesearch' => sub {
         return;               
     }
     my $dbh = $db->DB_GetLink();
-    my $sth = $dbh->prepare("SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes FROM anime  WHERE anime.anime_name LIKE ? or anime.anime_name_russian LIKE ? LIMIT 5");
+    my $sth = $dbh->prepare("SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes FROM anime  WHERE anime.anime_name LIKE ? or anime.anime_name_russian LIKE ? LIMIT 15");
     $sth->execute("%".$name."%","%".$name."%");
     
     my @titles = ();
@@ -212,5 +217,52 @@ get '/v1/last_episodes' => sub {
     $c->render(json => \@episodes);
    
 };
+
+
+my $clients = {};
+websocket '/v1/ws_episodes' => sub {
+    my $self = shift;
+
+    $self->inactivity_timeout(0);
+
+    my $id = sprintf "%s", $self->tx;
+    $clients->{$id} = $self->tx;
+
+    $self->on(finish => sub {
+        delete $clients->{$id};
+    });
+};
+
+post '/v1/broadcast' => sub {
+  my $self = shift;
+  my $secret = $self->param("secret");
+  my $msg = $self->param("query");
+
+  my $token = $cfg_lib::config->{'secret'}->{'token'};
+
+  unless ($secret eq $token) {
+       $self->rendered(503);
+        my $reject = {
+            'description' => 'incorrect token'
+        };
+        $self->render(json => $reject);
+        return; 
+  }
+  if (length($msg) <= 1) {
+        $self->rendered(503);
+        my $reject = {
+            'description' => 'incorrect query'
+        };
+        $self->render(json => $reject);
+        return;      
+  }
+  for (keys %$clients){
+    $clients->{$_}->send({text => $msg
+            });
+  };
+  $self->render(text => "ok");
+};
+
+
 # Required
 app->start;
