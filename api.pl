@@ -13,8 +13,6 @@ use Scalar::Util qw(looks_like_number);
 use Data::Dumper;
 use Encode;
 use utf8;
-use DateTime;
-use JSON;
 
 use EV;
 use AnyEvent;

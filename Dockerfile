@@ -1,7 +1,7 @@
 FROM debian:stretch
 
 RUN apt update && \
-    apt install -y libmojolicious-perl libdbd-mysql-perl libyaml-libyaml-perl libfindbin-libs-perl libdbi-perl
+    apt install -y libmojolicious-perl libdbd-mysql-perl libyaml-libyaml-perl libfindbin-libs-perl libdbi-perl libanyevent-perl
 
 RUN mkdir /srapi
 ADD ./start.sh /srapi/start.sh
