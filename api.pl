@@ -218,11 +218,21 @@ get '/v1/episode/:episode_id' => sub {
 get '/v1/last_episodes' => sub {
     my $c = shift;
 
+
+    my $a_offset   = $c->param('offset');
+    my $a_limit    = $c->param('limit');
+    unless ( looks_like_number($a_limit) && $a_limit <= 30 ) {
+        $a_limit = 30;
+    }
+    unless ( looks_like_number($a_offset) ) {
+        $a_offset = 0;
+    }
+
     my $dbh = $db->DB_GetLink();
     my $sth = $dbh->prepare(
-"SELECT episode_id, episode_anime, episode_type, episode_updated_at, episode_count, episode_view FROM episodes WHERE episode_posted = 1 ORDER BY episode_id desc LIMIT 15"
+"SELECT episode_id, episode_anime, episode_type, episode_updated_at, episode_count, episode_view FROM episodes WHERE episode_posted = 1 ORDER BY episode_id desc LIMIT ? OFFSET ?"
     );
-    $sth->execute();
+    $sth->execute($a_limit, $a_offset);
 
     my @episodes = ();
     while ( my $ref = $sth->fetchrow_hashref() ) {
