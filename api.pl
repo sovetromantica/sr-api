@@ -91,14 +91,26 @@ get '/v1/anime/:anime_id' => sub {
 
     # Кто-нибудь, придумайте запрос умнее!
     my $sth = $dbh->prepare( "
-        select a.anime_id, a.anime_year, a.anime_name, a.anime_name_russian, a.anime_studio, a.anime_description,
-            a.anime_keywords, a.anime_episodes, a.anime_soft_raw_link, a.anime_ongoing, a.anime_folder,
-            count(if(e.episode_type = 0, 1, null)) as episode_current_sub,
-            count(if(e.episode_type = 1, 1, null)) as episode_current_dub
-        from anime a join episodes e on a.anime_id = e.episode_anime
-        where anime_id = ? and anime_disabled = 0
-        group by a.anime_id
-        limit 1"
+        SELECT
+            anime_id,
+            anime_year,
+            anime_name,
+            anime_name_russian,
+            anime_studio,
+            anime_description,
+            anime_keywords,
+            anime_episodes,
+            anime_soft_raw_link,
+            anime_ongoing,
+            anime_folder,
+            ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 0 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_sub,
+            ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 1 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_dub 
+        FROM
+            anime a 
+        WHERE
+            anime_disabled = 0 
+            AND anime_id = ? 
+            LIMIT 1"
     );
     $sth->execute( $id );
 
