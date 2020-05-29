@@ -125,7 +125,6 @@ get '/v1/ongoing' => sub {
 
     my $dbh = $db->DB_GetLink();
 
-    # Кто-нибудь, придумайте запрос умнее!
     my $sth = $dbh->prepare( "SELECT anime_id FROM anime WHERE anime_ongoing = 1" );
     $sth->execute();
 
