@@ -119,6 +119,33 @@ get '/v1/anime/:anime_id' => sub {
 
 };
 
+get '/v1/ongoing' => sub {
+    my $c = shift;
+
+
+    my $dbh = $db->DB_GetLink();
+
+    # Кто-нибудь, придумайте запрос умнее!
+    my $sth = $dbh->prepare( "SELECT anime_id FROM anime WHERE anime_ongoing = 1" );
+    $sth->execute();
+
+    my @titles = ();
+    while ( my $ref = $sth->fetchrow_hashref() ) {
+        push @titles, $ref->{'anime_id'};
+    }
+
+    unless ( $titles[0] ) {
+        my $reject = {
+            'code'        => 503,
+            'description' => 'anime rows are empty'
+        };
+        $c->render( json => $reject, status => 503 );
+        return;
+    }
+    $c->render( json => \@titles );
+
+};
+
 get '/v1/anime/:anime_id/episodes' => sub {
     my $c = shift;
 
