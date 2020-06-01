@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Sovetromantica API методы",
-    "version": "1.0.1",
+    "description": "Sovetromantica API методы. \r\nВсе методы, на данный момент, возвращают ответ со статусом 200. Response-коды ошибок нужно проверять по телу ответа.",
+    "version": "1.0.2",
     "title": "Sovetromantica APIᵇᵉᵗᵃ"
   },
   "host": "service.sovetromantica.com",
@@ -10,10 +10,18 @@
   "tags": [
     {
       "name": "Anime",
-      "description": "Первая версия API sovetromantica",
+      "description": "Методы для получения деталей по тайтлам",
       "externalDocs": {
         "description": "Больше информации на",
-        "url": "http://sovetromantica.com"
+        "url": "https://github.com/sovetromantica/sr-api"
+      }
+    },
+    {
+      "name": "Episodes",
+      "description": "Методы для получения информации об эпизодах",
+      "externalDocs": {
+        "description": "Больше информации на",
+        "url": "https://github.com/sovetromantica/sr-api"
       }
     }
   ],
@@ -26,7 +34,7 @@
         "tags": [
           "Anime"
         ],
-        "summary": "Метод ищет информацию об аниме",
+        "summary": "Ищет тайтлы по части названия",
         "description": "Возвращает JSON таблицу",
         "operationId": "getAnimeSearch",
         "produces": [
@@ -60,8 +68,8 @@
         "tags": [
           "Anime"
         ],
-        "summary": "Метод возвращает информацию об аниме тайтле",
-        "description": "Возвращает JSON таблицу",
+        "summary": "Возвращает информацию об аниме по id",
+        "description": "Возвращает JSON таблицу с одним элементом. \r\nВ случае ошибки в ответ приходит сообщение с response-кодом и описанием.",
         "operationId": "getAnimeInfo",
         "produces": [
           "application/json"
@@ -86,12 +94,115 @@
         }
       }
     },
-    "/anime/{anime_id}/episodes": {
+    "/list": {
       "get": {
         "tags": [
           "Anime"
         ],
-        "summary": "Метод возвращает спиок эпизодов",
+        "summary": "Возвращает список аниме с сортировкой по id и опциональными фильтрами",
+        "description": "Возвращает JSON таблицу с одним элементом. \r\nВ случае ошибки в ответ приходит сообщение с response-кодом и описанием.",
+        "operationId": "getAnimeList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Начало страницы",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Количество тайтлов на странице (&le 30)",
+            "required": false,
+            "type": "integer",
+            "format": "int32", 
+            "default": 30
+          },
+          {
+            "name": "studio",
+            "in": "query",
+            "description": "Название студии",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "На выбранной странице тайтлов не найдено"
+          }
+        }
+      }
+    },    "/animes": {
+      "post": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Возвращает информацию об аниме по списку id",
+        "description": "Возвращает JSON таблицу с информацией о всех доступных аниме из присланного списка. \r\nКоличество возвращаемых объектов &le; 60. \r\nВ случае ошибки в ответ приходит сообщение с response-кодом и описанием.",
+        "operationId": "getAnimeInfoForList",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "anime_id_array",
+            "description": "JSON-список с id нужных аниме",
+            "required": true,
+            "type": "string",
+            "default": "[1,955]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "не корректные входные данные (не json-array)\r\nне найдена информация ни по одному id из списка"
+          }
+        }
+      }
+    },
+    "/ongoing": {
+      "get": {
+        "tags": [
+          "Anime"
+        ],
+        "summary": "Возвращает список id тайтлов в онгоинге",
+        "description": "Возвращает JSON таблицу со списком id всех тайтлов в онгоинге",
+        "operationId": "getOngoingAnime",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "503": {
+            "description": "онгоингов не найдено"
+          }
+        }
+      }
+    },
+    "/anime/{anime_id}/episodes": {
+      "get": {
+        "tags": [
+          "Anime",
+          "Episodes"
+        ],
+        "summary": "Метод возвращает спиок эпизодов выбранного тайтла",
         "description": "Метод возвращает спиок эпизодов по ID аниме",
         "operationId": "getAnimeEpisodesByAnimeID",
         "produces": [
@@ -120,7 +231,7 @@
     "/episode/{episode_id}": {
       "get": {
         "tags": [
-          "Anime"
+          "Episodes"
         ],
         "summary": "Метод возвращает информацию об эпизоде",
         "description": "Метод возвращает информацию об эпизоде по его ID",
@@ -151,7 +262,7 @@
     "/last_episodes": {
       "get": {
         "tags": [
-          "Anime"
+          "Episodes"
         ],
         "summary": "Возвращает 15 последних эпизодов",
         "description": "Возвращает JSON таблицу с 15 последними эпизодами",
