@@ -53,9 +53,25 @@ get '/v1/animesearch' => sub {
         return;
     }
     my $dbh = $db->DB_GetLink();
-    my $sth = $dbh->prepare(
-"SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes, anime_folder FROM anime  WHERE anime.anime_name LIKE ? or anime.anime_name_russian LIKE ? LIMIT 20"
-    );
+    my $sth = $dbh->prepare( "
+        SELECT
+            anime_id,
+            anime_year,
+            anime_name,
+            anime_name_russian,
+            anime_studio,
+            anime_description,
+            anime_keywords,
+            anime_episodes,
+            anime_folder,
+            anime_shikimori
+        FROM
+            anime 
+        WHERE
+            anime.anime_name LIKE ? 
+            OR anime.anime_name_russian LIKE ? 
+            LIMIT 20
+    ");
 
     $sth->execute( "%" . $name . "%", "%" . $name . "%" );
 
@@ -103,6 +119,7 @@ get '/v1/anime/:anime_id' => sub {
             anime_soft_raw_link,
             anime_ongoing,
             anime_folder,
+            anime_shikimori,
             ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 0 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_sub,
             ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 1 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_dub 
         FROM
@@ -307,9 +324,24 @@ get '/v1/list' => sub {
         $a_offset = 0;
     }
     my $dbh = $db->DB_GetLink();
-    my $sth = $dbh->prepare(
-"SELECT anime_id, anime_year, anime_name, anime_name_russian, anime_studio, anime_description, anime_keywords, anime_episodes, anime_folder FROM anime ORDER BY anime_id LIMIT ? OFFSET ?"
-    );
+    my $sth = $dbh->prepare( "
+        SELECT
+            anime_id,
+            anime_year,
+            anime_name,
+            anime_name_russian,
+            anime_studio,
+            anime_description,
+            anime_keywords,
+            anime_episodes,
+            anime_folder,
+            anime_shikimori 
+        FROM
+            anime 
+        ORDER BY
+            anime_id 
+            LIMIT ? OFFSET ?
+    ");
     $sth->execute( $a_limit, $a_offset );
 
     my @anime = ();
