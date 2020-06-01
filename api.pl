@@ -10,7 +10,9 @@ use Mojolicious::Lite;
 
 use Mojo::Util qw(secure_compare);
 use Scalar::Util qw(looks_like_number);
+use SQL::Abstract::mysql;
 use Data::Dumper;
+use JSON;
 use Encode;
 use utf8;
 
@@ -25,6 +27,9 @@ BEGIN {
 
 # DB Connection
 my $db = mysql_db->DB_Init( %{ $cfg_lib::config->{'db'} } );
+
+# SQL Abstract init
+my $abstract = SQL::Abstract::mysql->new(quote_char => chr(96), name_sep => '.');
 
 # Go to the production!
 app->mode('production');
@@ -144,6 +149,69 @@ get '/v1/anime/:anime_id' => sub {
             'description' => 'anime rows are empty'
         };
         $c->render( json => $reject );
+        return;
+    }
+    $c->render( json => \@titles );
+
+};
+
+post '/v1/animes' => sub {
+    my $c = shift;
+
+    my $jsonarr = $c->param('anime_id_array');
+    my $array = eval { JSON::decode_json($jsonarr) };
+    if ($@)
+    {
+        my $reject = {
+            'code'        => 503,
+            'description' => 'JSON array is not correct'
+        };
+        $c->render( json => $reject, status => 503 );
+        return;
+    }
+
+    my $dbh = $db->DB_GetLink();
+
+    my $select = "
+        SELECT
+            anime_id,
+            anime_year,
+            anime_name,
+            anime_name_russian,
+            anime_studio,
+            anime_description,
+            anime_keywords,
+            anime_episodes,
+            anime_soft_raw_link,
+            anime_ongoing,
+            anime_folder,
+            anime_shikimori,
+            anime_paused,
+            ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 0 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_sub,
+            ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 1 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_dub 
+        FROM
+            anime a ";
+    my %where  = (
+        anime_disabled => 0,
+        anime_id => { -in => $array }
+    );
+    my ($out, @bind) = $abstract->where(\%where );
+
+    my $sth = $dbh->prepare( $select." \n".$out."\n LIMIT 60;" );
+
+    $sth->execute( @bind );
+
+    my @titles = ();
+    while ( my $ref = $sth->fetchrow_hashref() ) {
+        push @titles, $ref;
+    }
+
+    unless ( $titles[0] ) {
+        my $reject = {
+            'code'        => 503,
+            'description' => 'anime rows are empty'
+        };
+        $c->render( json => $reject, status => 503 );
         return;
     }
     $c->render( json => \@titles );
