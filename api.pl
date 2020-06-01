@@ -64,7 +64,8 @@ get '/v1/animesearch' => sub {
             anime_keywords,
             anime_episodes,
             anime_folder,
-            anime_shikimori
+            anime_shikimori,
+            anime_paused
         FROM
             anime 
         WHERE
@@ -120,6 +121,7 @@ get '/v1/anime/:anime_id' => sub {
             anime_ongoing,
             anime_folder,
             anime_shikimori,
+            anime_paused,
             ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 0 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_sub,
             ( SELECT count( episode_count ) FROM episodes WHERE episode_type = 1 AND episode_posted = 1 AND episode_anime = a.anime_id ) AS episode_current_dub 
         FROM
@@ -335,7 +337,8 @@ get '/v1/list' => sub {
             anime_keywords,
             anime_episodes,
             anime_folder,
-            anime_shikimori 
+            anime_shikimori,
+            anime_paused
         FROM
             anime 
         ORDER BY
