@@ -1,0 +1,404 @@
+openapi: 3.0.1
+info:
+  title: Sovetromantica APIᵇᵉᵗᵃ
+  description: "Sovetromantica API методы. \r\nВсе методы, на данный момент, возвр\
+    ащают ответ со статусом 200. Response-коды ошибок нужно проверять по телу отве\
+    та."
+  version: 1.0.2
+servers:
+- url: https://service.sovetromantica.com/v1
+tags:
+- name: Anime
+  description: Методы для получения деталей по тайтлам
+  externalDocs:
+    description: Больше информации на
+    url: https://github.com/sovetromantica/sr-api
+- name: Episodes
+  description: Методы для получения информации об эпизодах
+  externalDocs:
+    description: Больше информации на
+    url: https://github.com/sovetromantica/sr-api
+paths:
+  /animesearch:
+    get:
+      tags:
+      - Anime
+      summary: Ищет тайтлы по части названия
+      description: Возвращает JSON таблицу
+      operationId: getAnimeSearch
+      parameters:
+      - name: anime_name
+        in: query
+        description: часть названия аниме, на английском или русском
+        required: true
+        schema:
+          type: string
+          format: string
+        example: black lagoon
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Anime'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /anime/{anime_id}:
+    get:
+      tags:
+      - Anime
+      summary: Возвращает информацию об аниме по id
+      description: "Возвращает JSON таблицу с одним элементом. \r\nВ случае ошибки\
+        \ в ответ приходит сообщение с response-кодом и описанием."
+      operationId: getAnimeInfo
+      parameters:
+      - name: anime_id
+        in: path
+        description: ID аниме
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Anime'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /list:
+    get:
+      tags:
+      - Anime
+      summary: Возвращает список аниме с сортировкой по id и опциональными фильтрами
+      description: "Возвращает JSON таблицу с одним элементом. \r\nВ случае ошибки\
+        \ в ответ приходит сообщение с response-кодом и описанием."
+      operationId: getAnimeList
+      parameters:
+      - name: offset
+        in: query
+        description: Начало страницы
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: limit
+        in: query
+        description: Количество тайтлов на странице (&le 30)
+        schema:
+          type: integer
+          format: int32
+          default: 30
+      - name: studio
+        in: query
+        description: Название студии
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Anime'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /animes:
+    post:
+      tags:
+      - Anime
+      summary: Возвращает информацию об аниме по списку id
+      description: "Возвращает JSON таблицу с информацией о всех доступных аниме и\
+        з присланного списка. \r\nКоличество возвращаемых объектов &le; 60. \r\nВ\
+        \ случае ошибки в ответ приходит сообщение с response-кодом и описанием."
+      operationId: getAnimeInfoForList
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+              - anime_id_array
+              properties:
+                anime_id_array:
+                  type: string
+                  description: JSON-список с id нужных аниме
+                  default: '[1,955]'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Anime'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /ongoing:
+    get:
+      tags:
+      - Anime
+      summary: Возвращает список id тайтлов в онгоинге
+      description: Возвращает JSON таблицу со списком id всех тайтлов в онгоинге
+      operationId: getOngoingAnime
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Anime'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /anime/{anime_id}/episodes:
+    get:
+      tags:
+      - Anime
+      - Episodes
+      summary: Метод возвращает спиок эпизодов выбранного тайтла
+      description: Метод возвращает спиок эпизодов по ID аниме
+      operationId: getAnimeEpisodesByAnimeID
+      parameters:
+      - name: anime_id
+        in: path
+        description: ID аниме
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /episode/{episode_id}:
+    get:
+      tags:
+      - Episodes
+      summary: Метод возвращает информацию об эпизоде
+      description: Метод возвращает информацию об эпизоде по его ID
+      operationId: getAnimeEpisodeById
+      parameters:
+      - name: episode_id
+        in: path
+        description: ID эпизода
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /last_episodes:
+    get:
+      tags:
+      - Episodes
+      summary: Возвращает 15 последних эпизодов
+      description: Возвращает JSON таблицу с 15 последними эпизодами
+      operationId: getEpisodesLatest
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+        503:
+          description: не корректные аргументы/по этому запросу ничего не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    Anime:
+      required:
+      - anime_description
+      - anime_episodes
+      - anime_folder
+      - anime_id
+      - anime_keywords
+      - anime_name
+      - anime_name_russian
+      - anime_paused
+      - anime_shikimori
+      - anime_studio
+      - anime_year
+      type: object
+      properties:
+        anime_description:
+          type: string
+          description: длинное текстовое описание аниме
+          example: Рокуро Окадзима [岡島緑郎] — типичный японский служащий, работающий
+            на крупную корпорацию и живущий в городе, население которого едва ли не
+            полностью состоит из похожих людей. Как и у многих, его обычный день компонуют
+            многочисленные «пинки» начальства и «деловые встречи», обязывающие Рокуро
+            не столько работать, сколько выпивать вместе с клиентами.\r\nОдним днём
+            привычный образ жизни «рабочей лошадки» нарушает неожиданная командировка.
+            В качестве посыльного, которому вверили диск с чрезвычайно важной информацией,
+            начальство отправляет Рокуро в тёплые воды Южно-Китайского моря. Казалось
+            бы, нужно всего-то пересечь пару десятков морских миль, сойти у берегов
+            Борнео и вручить ценную посылку менеджеру тамошнего филиала. Но, как известно,
+            не всё творится, что просто говорится. По пути корабль, на котором плывёт
+            Рокуро, захватывают пираты, нанятые русской мафией.\r\nРасставшись с посылкой,
+            взамен получив пару болезненных ударов, Рокуро решает, что отделался мелкой
+            монетой. Однако ствол блестящего пистолета, в ту же минуту вновь направленный
+            на него, доходчиво объясняет обратное. Так мягкотелый клерк становится
+            заложником на маленьком пиратском судне под названием «Лагуна».\r\nПока
+            диск с информацией о незаконной деятельности ещё не попал в руки мафии,
+            совет директоров корпорации решает избавиться не только от пиратов, но
+            и от неудавшегося посыльного. Чтобы замести следы, бизнесмены покупают
+            услуги наёмников, которые в ближайшие пару часов становятся серьёзной
+            проблемой для экипажа «Лагуны». Как ни странно, выбраться из передряги
+            им помогает пленный Рокуро, с тех пор «похороненный» в родной стране как
+            безликий служащий и «воскресший» как пират в чужой.
+        anime_episodes:
+          type: integer
+          description: количество эпизодов
+          example: 12
+        anime_folder:
+          type: string
+          description: название папки (нужно при получении ресурсов, связанных с аниме,
+            такими как обложка и ссылки на эпизоды)
+          example: black-lagoon
+        anime_id:
+          type: integer
+          description: id в базе
+          example: 980
+        anime_keywords:
+          type: string
+          description: теги этого аниме
+          example: null
+        anime_name:
+          type: string
+          description: оригинальное название
+          example: Black Lagoon
+        anime_name_russian:
+          type: string
+          description: руссифицированное название
+          example: Пираты «Чёрной лагуны»
+        anime_paused:
+          type: integer
+          description: маркер приостановленного тайтла
+          example: 0
+        anime_shikimori:
+          type: integer
+          description: id в базе шикимори
+          example: 889
+        anime_studio:
+          type: integer
+          description: id студии
+          example: 83
+        anime_year:
+          type: integer
+          description: дата выхода
+          example: 2006
+        episode_current_dub:
+          type: integer
+          description: число эпизодов с SR озвучкой
+          example: 12
+        episode_current_sub:
+          type: integer
+          description: число эпизодов с SR сабами
+          example: 0
+    ApiError:
+      required:
+      - code
+      - description
+      type: object
+      properties:
+        code:
+          type: integer
+          description: код ошибки
+          example: 503
+        description:
+          type: string
+          description: описание ошибки
+          example: incorrect argument
+    Episode:
+      type: object
+      properties:
+        embed:
+          type: string
+          description: ссылка на встраиваемый плеер
+          example: https://sovetromantica.com/embed/episode_925_16-subtitles
+        episode_anime:
+          type: integer
+          description: id аниме
+          example: 925
+        episode_count:
+          type: integer
+          description: номер эпизода
+          example: 16
+        episode_id:
+          type: integer
+          description: id эпизода
+          example: 17556
+        episode_type:
+          type: integer
+          description: тип эпизода (0 - сабы, 1 - озвучка)
+          example: 0
+        episode_updated_at:
+          type: string
+          description: время последнего обновления в формате "YYYY-MM-DD HH:mm:SS"
+          example: 2020-06-02 16:26:33
+        episode_view:
+          type: integer
+          description: число просмотров (?)
+          example: 16
