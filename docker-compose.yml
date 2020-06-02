@@ -16,7 +16,7 @@ services:
         ports:
             - "127.0.0.1:3051:8080"
         volumes:
-            - ./srapi.json:/srapi.json
+            - ./openapi.yaml:/openapi.yaml
         environment:
-            SWAGGER_JSON: /srapi.json
+            SWAGGER_JSON: /openapi.yaml
         restart: always
