@@ -247,9 +247,28 @@ paths:
     get:
       tags:
       - Episodes
-      summary: Возвращает 15 последних эпизодов
-      description: Возвращает JSON таблицу с 15 последними эпизодами
+      summary: Возвращает список эпизодов по limit,offset, начиная с самых последних.
+      description: Возвращает JSON таблицу с \<limit\> эпизодов, по смещению в базе на \<offset\>
       operationId: getEpisodesLatest
+      parameters:
+        - name: limit
+          in: query
+          description: "Количество эпизодов в ответе. Макс: 30"
+          required: false
+          schema:
+            type: integer
+            exclusiveMinimum: true
+            minimum: 0
+            maximum: 30
+            default: 30
+        - name: offset
+          in: query
+          description: Смещение в базе данных
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
       responses:
         200:
           description: successful operation
